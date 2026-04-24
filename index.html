@@ -1,0 +1,1336 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PartySpace — Find the Perfect Venue for Your Next Event</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #7C3AED;
+    --purple-light: #9B59F5;
+    --purple-dark: #5B21B6;
+    --pink: #EC4899;
+    --pink-light: #F472B6;
+    --gold: #FBBF24;
+    --dark: #0D0A1A;
+    --dark-2: #1A1228;
+    --dark-3: #241A36;
+    --light: #F8F5FF;
+    --text-muted: #9B8EC4;
+    --white: #FFFFFF;
+    --gradient: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+    --gradient-gold: linear-gradient(135deg, var(--gold) 0%, #F59E0B 100%);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--white);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--pink);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid rgba(236, 72, 153, 0.5);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.3s, height 0.3s;
+  }
+  a:hover ~ .cursor, button:hover ~ .cursor { width: 20px; height: 20px; }
+
+  /* Noise Texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1; opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 20px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    backdrop-filter: blur(20px);
+    background: rgba(13, 10, 26, 0.7);
+    border-bottom: 1px solid rgba(124, 58, 237, 0.15);
+    transition: all 0.3s;
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.5px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+  }
+  .nav-logo span { font-style: italic; font-family: 'Playfair Display', serif; }
+  .nav-links {
+    display: flex; gap: 36px; list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none;
+    font-size: 14px; font-weight: 400; letter-spacing: 0.3px;
+    transition: color 0.2s;
+    cursor: none;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    display: flex; gap: 12px; align-items: center;
+  }
+  .btn-ghost {
+    padding: 9px 22px; border: 1px solid rgba(124, 58, 237, 0.4);
+    color: var(--purple-light); background: transparent;
+    border-radius: 50px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+    cursor: none; transition: all 0.2s; text-decoration: none;
+    display: inline-flex; align-items: center;
+  }
+  .btn-ghost:hover { border-color: var(--purple); background: rgba(124,58,237,0.1); color: var(--white); }
+  .btn-primary {
+    padding: 10px 24px;
+    background: var(--gradient);
+    color: var(--white); border: none; border-radius: 50px;
+    font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    cursor: none; transition: all 0.3s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(236,72,153,0.4); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 40px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); pointer-events: none;
+  }
+  .orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%);
+    top: -100px; left: -100px;
+    animation: float1 8s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%);
+    bottom: -50px; right: -50px;
+    animation: float2 10s ease-in-out infinite;
+  }
+  .orb-3 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    animation: float3 12s ease-in-out infinite;
+  }
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,30px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,40px)} }
+  @keyframes float3 { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-45%,-55%)} }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.3);
+    padding: 6px 16px; border-radius: 50px;
+    font-size: 12px; color: var(--purple-light);
+    letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-tag-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--pink);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -2px;
+    max-width: 900px;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  .hero h1 em {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    margin-top: 20px;
+    font-size: 18px; font-weight: 300;
+    color: var(--text-muted); line-height: 1.6;
+    max-width: 520px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 14px; margin-top: 40px;
+    flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .btn-big {
+    padding: 16px 36px; font-size: 16px;
+    border-radius: 50px; font-weight: 500;
+  }
+  .btn-outline-big {
+    padding: 15px 36px; font-size: 16px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--white); border-radius: 50px;
+    text-decoration: none; cursor: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'DM Sans', sans-serif; font-weight: 400;
+    transition: all 0.2s;
+  }
+  .btn-outline-big:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
+
+  /* Search Bar */
+  .hero-search {
+    margin-top: 52px; width: 100%; max-width: 680px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 8px 8px 8px 24px;
+    display: flex; align-items: center; gap: 12px;
+    backdrop-filter: blur(20px);
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .hero-search input {
+    flex: 1; background: transparent; border: none;
+    color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 15px; outline: none;
+  }
+  .hero-search input::placeholder { color: rgba(255,255,255,0.3); }
+  .search-divider {
+    width: 1px; height: 24px;
+    background: rgba(255,255,255,0.1);
+  }
+  .search-icon { color: var(--text-muted); font-size: 18px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TRUST BAR */
+  .trust-bar {
+    padding: 32px 60px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex; justify-content: center; gap: 64px;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .trust-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .trust-label {
+    font-size: 12px; color: var(--text-muted);
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* SECTION STYLES */
+  section { padding: 100px 60px; position: relative; }
+  .section-tag {
+    display: inline-block;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--pink); font-weight: 500; margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800; line-height: 1.1; letter-spacing: -1px;
+    max-width: 600px; margin-bottom: 20px;
+  }
+  .section-title em {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    color: var(--purple-light);
+  }
+  .section-sub {
+    font-size: 16px; color: var(--text-muted);
+    max-width: 480px; line-height: 1.7; font-weight: 300;
+  }
+  .section-header { text-align: center; max-width: 600px; margin: 0 auto 60px; }
+  .section-header .section-title { max-width: 100%; }
+  .section-header .section-sub { max-width: 100%; }
+
+  /* HOW IT WORKS */
+  .how-it-works { background: var(--dark-2); }
+  .steps-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; max-width: 1100px; margin: 0 auto;
+  }
+  .step-card {
+    background: var(--dark-3);
+    padding: 48px 40px; position: relative;
+    transition: background 0.3s;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .step-card:first-child { border-radius: 20px 0 0 20px; }
+  .step-card:last-child { border-radius: 0 20px 20px 0; }
+  .step-card:hover { background: rgba(124,58,237,0.1); }
+  .step-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 72px; font-weight: 800;
+    color: rgba(124,58,237,0.15);
+    line-height: 1; margin-bottom: 24px;
+    transition: color 0.3s;
+  }
+  .step-card:hover .step-number { color: rgba(124,58,237,0.3); }
+  .step-icon {
+    width: 48px; height: 48px;
+    background: var(--gradient);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(124,58,237,0.3);
+  }
+  .step-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px; font-weight: 700; margin-bottom: 12px;
+  }
+  .step-card p {
+    font-size: 14px; color: var(--text-muted);
+    line-height: 1.7; font-weight: 300;
+  }
+  .step-connector {
+    position: absolute; right: -1px; top: 50%;
+    transform: translateY(-50%);
+    width: 2px; height: 40px;
+    background: var(--gradient); opacity: 0.4;
+  }
+
+  /* VENUES */
+  .venues-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px; max-width: 1200px; margin: 0 auto;
+  }
+  .venue-card {
+    background: var(--dark-3);
+    border-radius: 20px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    cursor: none;
+  }
+  .venue-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(124,58,237,0.3);
+    box-shadow: 0 20px 60px rgba(124,58,237,0.15);
+  }
+  .venue-img {
+    height: 200px; position: relative; overflow: hidden;
+  }
+  .venue-img-bg {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.5s;
+  }
+  .venue-card:hover .venue-img-bg { transform: scale(1.05); }
+  .venue-img-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13,10,26,0.8) 0%, transparent 60%);
+  }
+  .venue-badge {
+    position: absolute; top: 14px; left: 14px;
+    background: rgba(13,10,26,0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px; padding: 4px 12px;
+    font-size: 11px; color: var(--gold);
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .venue-price-tag {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--gradient);
+    border-radius: 50px; padding: 5px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+  }
+  .venue-body { padding: 20px; }
+  .venue-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px; font-weight: 700; margin-bottom: 6px;
+  }
+  .venue-location {
+    font-size: 13px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 5px;
+    margin-bottom: 14px;
+  }
+  .venue-meta {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .venue-meta-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-muted);
+  }
+  .venue-rating {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px;
+  }
+  .stars { color: var(--gold); letter-spacing: 1px; }
+  .venue-footer {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 14px; padding-top: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .btn-card {
+    padding: 8px 18px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.3);
+    color: var(--purple-light); border-radius: 50px;
+    font-size: 13px; text-decoration: none; cursor: none;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    display: inline-block;
+  }
+  .btn-card:hover { background: var(--purple); color: var(--white); border-color: var(--purple); }
+
+  /* CATEGORIES */
+  .categories { background: var(--dark-2); }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px; max-width: 1100px; margin: 0 auto;
+  }
+  .cat-card {
+    position: relative; border-radius: 20px; overflow: hidden;
+    cursor: none; min-height: 180px;
+    display: flex; align-items: flex-end;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .cat-card:hover { transform: scale(1.02); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .cat-card:first-child { grid-row: span 2; min-height: 380px; }
+  .cat-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 80px;
+  }
+  .cat-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13,10,26,0.9) 0%, rgba(13,10,26,0.3) 60%, transparent 100%);
+  }
+  .cat-content {
+    position: relative; z-index: 1;
+    padding: 24px;
+  }
+  .cat-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px; font-weight: 700; display: block;
+  }
+  .cat-count {
+    font-size: 12px; color: var(--text-muted); margin-top: 4px; display: block;
+  }
+  .cat-card:nth-child(1) .cat-bg { background: linear-gradient(135deg, #2D1B69, #7C3AED); }
+  .cat-card:nth-child(2) .cat-bg { background: linear-gradient(135deg, #831843, #EC4899); }
+  .cat-card:nth-child(3) .cat-bg { background: linear-gradient(135deg, #1E3A5F, #3B82F6); }
+  .cat-card:nth-child(4) .cat-bg { background: linear-gradient(135deg, #1A3025, #10B981); }
+  .cat-card:nth-child(5) .cat-bg { background: linear-gradient(135deg, #4A1A00, #F97316); }
+  .cat-card:nth-child(6) .cat-bg { background: linear-gradient(135deg, #3B1A5A, #A855F7); }
+
+  /* TESTIMONIALS */
+  .testimonials-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px; max-width: 1100px; margin: 0 auto;
+  }
+  .testimonial-card {
+    background: var(--dark-3);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px; padding: 32px;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .testimonial-card:hover { border-color: rgba(124,58,237,0.3); transform: translateY(-4px); }
+  .testimonial-card:nth-child(2) {
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(236,72,153,0.1));
+    border-color: rgba(124,58,237,0.2);
+  }
+  .quote-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 60px; line-height: 0.8;
+    color: var(--purple); opacity: 0.4;
+    margin-bottom: 12px; display: block;
+  }
+  .testimonial-text {
+    font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.8);
+    margin-bottom: 24px; font-weight: 300; font-style: italic;
+  }
+  .testimonial-author {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .author-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+    background: var(--gradient);
+  }
+  .author-name { font-weight: 500; font-size: 14px; }
+  .author-role { font-size: 12px; color: var(--text-muted); }
+  .author-stars { margin-left: auto; color: var(--gold); font-size: 12px; }
+
+  /* HOST CTA SPLIT */
+  .host-cta-section {
+    padding: 100px 60px;
+    background: var(--dark-2);
+  }
+  .host-cta-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .cta-panel {
+    border-radius: 24px; padding: 52px;
+    position: relative; overflow: hidden;
+  }
+  .cta-panel-guest {
+    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(236,72,153,0.1));
+    border: 1px solid rgba(124,58,237,0.25);
+  }
+  .cta-panel-host {
+    background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(249,115,22,0.1));
+    border: 1px solid rgba(251,191,36,0.2);
+  }
+  .cta-panel-bg {
+    position: absolute; bottom: -30px; right: -30px;
+    font-size: 140px; opacity: 0.06; pointer-events: none;
+  }
+  .cta-panel h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 800; margin-bottom: 14px; letter-spacing: -0.5px;
+  }
+  .cta-panel p {
+    font-size: 15px; color: var(--text-muted); line-height: 1.7;
+    margin-bottom: 28px; font-weight: 300;
+  }
+  .btn-gold {
+    padding: 14px 30px;
+    background: var(--gradient-gold);
+    color: var(--dark); border: none; border-radius: 50px;
+    font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    cursor: none; transition: all 0.3s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 24px rgba(251,191,36,0.3);
+  }
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(251,191,36,0.4); }
+
+  /* STATS BELT */
+  .stats-belt {
+    padding: 80px 60px;
+    background: var(--gradient);
+    text-align: center;
+  }
+  .stats-belt-grid {
+    display: flex; justify-content: center; gap: 80px;
+    flex-wrap: wrap; max-width: 900px; margin: 0 auto;
+  }
+  .stat-item { }
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px; font-weight: 800; display: block; line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 13px; opacity: 0.75; margin-top: 6px;
+    display: block; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* FAQ */
+  .faq { background: var(--dark); }
+  .faq-grid {
+    max-width: 740px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .faq-item {
+    background: var(--dark-3);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .faq-item:hover { border-color: rgba(124,58,237,0.3); }
+  .faq-q {
+    width: 100%; background: none; border: none;
+    color: var(--white); text-align: left;
+    padding: 20px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: none; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+  }
+  .faq-toggle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(124,58,237,0.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.3s;
+    font-size: 16px; color: var(--purple-light);
+  }
+  .faq-item.open .faq-toggle { background: var(--purple); color: var(--white); transform: rotate(45deg); }
+  .faq-a {
+    font-size: 14px; color: var(--text-muted);
+    line-height: 1.7; padding: 0 24px;
+    max-height: 0; overflow: hidden; transition: all 0.3s ease;
+    font-weight: 300;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding: 0 24px 20px; }
+
+  /* FOOTER */
+  footer {
+    background: var(--dark-2);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 70px 60px 40px;
+  }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 60px; margin-bottom: 60px;
+  }
+  .footer-brand p {
+    font-size: 14px; color: var(--text-muted); line-height: 1.7;
+    margin-top: 12px; font-weight: 300; max-width: 240px;
+  }
+  .footer-col h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: rgba(255,255,255,0.5); margin-bottom: 16px;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a {
+    font-size: 14px; color: var(--text-muted);
+    text-decoration: none; cursor: none; transition: color 0.2s; font-weight: 300;
+  }
+  .footer-col a:hover { color: var(--white); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-copy {
+    font-size: 13px; color: rgba(255,255,255,0.25);
+  }
+  .social-links { display: flex; gap: 12px; }
+  .social-btn {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); text-decoration: none; cursor: none;
+    transition: all 0.2s; font-size: 14px;
+  }
+  .social-btn:hover { border-color: var(--purple); color: var(--white); background: rgba(124,58,237,0.15); }
+  .newsletter-form {
+    display: flex; gap: 0; max-width: 340px; width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px; overflow: hidden;
+    margin-top: 20px;
+  }
+  .newsletter-form input {
+    flex: 1; background: transparent; border: none;
+    padding: 10px 18px; color: var(--white);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
+  }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.25); }
+  .newsletter-form button {
+    padding: 10px 20px;
+    background: var(--gradient);
+    border: none; color: var(--white);
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    cursor: none; white-space: nowrap; font-weight: 500;
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* Divider */
+  .gradient-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(124,58,237,0.5), rgba(236,72,153,0.5), transparent);
+  }
+
+  /* App download section */
+  .app-section {
+    padding: 100px 60px;
+    text-align: center;
+  }
+  .app-badges {
+    display: flex; gap: 14px; justify-content: center; margin-top: 36px; flex-wrap: wrap;
+  }
+  .app-badge {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 12px 24px;
+    cursor: none; text-decoration: none; color: var(--white);
+    transition: all 0.2s;
+  }
+  .app-badge:hover { border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.1); }
+  .app-badge-icon { font-size: 28px; }
+  .app-badge-text { text-align: left; }
+  .app-badge-sub { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .app-badge-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    section { padding: 70px 20px; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .step-card:first-child { border-radius: 20px 20px 0 0; }
+    .step-card:last-child { border-radius: 0 0 20px 20px; }
+    .cat-grid { grid-template-columns: 1fr 1fr; }
+    .cat-card:first-child { grid-row: span 1; min-height: 180px; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .host-cta-inner { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .trust-bar { padding: 32px 20px; gap: 32px; }
+    nav { padding: 16px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Party<span>Space</span></a>
+  <ul class="nav-links">
+    <li><a href="#venues">Venues</a></li>
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#host">For Hosts</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn-ghost">Log In</a>
+    <a href="#" class="btn-primary">Download App ↓</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-orb orb-1"></div>
+  <div class="hero-orb orb-2"></div>
+  <div class="hero-orb orb-3"></div>
+  <div class="hero-tag">
+    <span class="hero-tag-dot"></span>
+    500+ Verified Venues · Live Now
+  </div>
+  <h1>Find the <em>Perfect Venue</em><br>for Your Next Event</h1>
+  <p class="hero-sub">Browse 500+ verified venues. Book instantly. Celebrate confidently — from intimate gatherings to grand celebrations.</p>
+  <div class="hero-actions">
+    <a href="#" class="btn-primary btn-big">⬇ Download Free App</a>
+    <a href="#venues" class="btn-outline-big">Browse as Guest →</a>
+  </div>
+  <div class="hero-search">
+    <span class="search-icon">📍</span>
+    <input type="text" placeholder="Search by city, venue type, or event...">
+    <div class="search-divider"></div>
+    <span class="search-icon">🗓</span>
+    <input type="text" placeholder="Pick a date" style="max-width:120px">
+    <div class="search-divider"></div>
+    <a href="#" class="btn-primary" style="padding:10px 20px;font-size:14px">Search</a>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item reveal">
+    <span class="trust-number">10K+</span>
+    <span class="trust-label">Events Booked</span>
+  </div>
+  <div class="trust-item reveal reveal-delay-1">
+    <span class="trust-number">4.8★</span>
+    <span class="trust-label">Average Rating</span>
+  </div>
+  <div class="trust-item reveal reveal-delay-2">
+    <span class="trust-number">500+</span>
+    <span class="trust-label">Verified Venues</span>
+  </div>
+  <div class="trust-item reveal reveal-delay-3">
+    <span class="trust-number">50+</span>
+    <span class="trust-label">Cities Covered</span>
+  </div>
+  <div class="trust-item reveal reveal-delay-4">
+    <span class="trust-number">24/7</span>
+    <span class="trust-label">Customer Support</span>
+  </div>
+</div>
+
+<div class="gradient-divider"></div>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how">
+  <div class="section-header">
+    <span class="section-tag reveal">How It Works</span>
+    <h2 class="section-title reveal reveal-delay-1">Book a venue in <em>three steps</em></h2>
+    <p class="section-sub reveal reveal-delay-2">No phone calls, no waiting. From discovery to confirmation in minutes.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card reveal">
+      <div class="step-number">01</div>
+      <div class="step-icon">🔍</div>
+      <h3>Search & Discover</h3>
+      <p>Browse by city, category, capacity, and price. Filter by amenities, availability, and guest count. Find the perfect match in seconds.</p>
+      <div class="step-connector"></div>
+    </div>
+    <div class="step-card reveal reveal-delay-1">
+      <div class="step-number">02</div>
+      <div class="step-icon">📅</div>
+      <h3>Book & Confirm</h3>
+      <p>Select your date, time, and services. Pay securely with Stripe. Get instant confirmation from verified hosts — no waiting around.</p>
+      <div class="step-connector"></div>
+    </div>
+    <div class="step-card reveal reveal-delay-2">
+      <div class="step-number">03</div>
+      <div class="step-icon">🎉</div>
+      <h3>Celebrate</h3>
+      <p>Arrive at your venue, everything ready. Host receives confirmation, you get all the details. Just show up and make memories.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED VENUES -->
+<section id="venues" style="background:var(--dark)">
+  <div class="section-header">
+    <span class="section-tag reveal">Featured Venues</span>
+    <h2 class="section-title reveal reveal-delay-1">Handpicked <em>spaces</em> for every occasion</h2>
+    <p class="section-sub reveal reveal-delay-2">Each venue is verified, reviewed, and ready to book instantly through our platform.</p>
+  </div>
+  <div class="venues-grid">
+
+    <div class="venue-card reveal">
+      <div class="venue-img" style="background:linear-gradient(135deg,#2D1B69,#7C3AED,#EC4899)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:70px;opacity:0.3">🏛️</div>
+        <div class="venue-img-overlay"></div>
+        <span class="venue-badge">⭐ Top Rated</span>
+        <span class="venue-price-tag">$180/hr</span>
+      </div>
+      <div class="venue-body">
+        <div class="venue-name">The Grand Atrium</div>
+        <div class="venue-location">📍 Downtown Manhattan, NY</div>
+        <div class="venue-meta">
+          <div class="venue-meta-item">👥 Up to 300</div>
+          <div class="venue-meta-item">🅿️ Valet</div>
+          <div class="venue-meta-item">🍽️ Catering</div>
+        </div>
+        <div class="venue-footer">
+          <div class="venue-rating"><span class="stars">★★★★★</span> <span style="font-size:13px;color:var(--text-muted)">4.9 (128)</span></div>
+          <a href="#" class="btn-card">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="venue-card reveal reveal-delay-1">
+      <div class="venue-img" style="background:linear-gradient(135deg,#831843,#EC4899,#F97316)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:70px;opacity:0.3">🌿</div>
+        <div class="venue-img-overlay"></div>
+        <span class="venue-badge">🌿 Garden</span>
+        <span class="venue-price-tag">$95/hr</span>
+      </div>
+      <div class="venue-body">
+        <div class="venue-name">Bloom Garden Estate</div>
+        <div class="venue-location">📍 Beverly Hills, CA</div>
+        <div class="venue-meta">
+          <div class="venue-meta-item">👥 Up to 150</div>
+          <div class="venue-meta-item">🌤️ Outdoor</div>
+          <div class="venue-meta-item">📸 Photo-ready</div>
+        </div>
+        <div class="venue-footer">
+          <div class="venue-rating"><span class="stars">★★★★★</span> <span style="font-size:13px;color:var(--text-muted)">4.8 (94)</span></div>
+          <a href="#" class="btn-card">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="venue-card reveal reveal-delay-2">
+      <div class="venue-img" style="background:linear-gradient(135deg,#1E3A5F,#3B82F6,#06B6D4)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:70px;opacity:0.3">🏙️</div>
+        <div class="venue-img-overlay"></div>
+        <span class="venue-badge">🏙️ Rooftop</span>
+        <span class="venue-price-tag">$220/hr</span>
+      </div>
+      <div class="venue-body">
+        <div class="venue-name">SkyLine Terrace</div>
+        <div class="venue-location">📍 River North, Chicago</div>
+        <div class="venue-meta">
+          <div class="venue-meta-item">👥 Up to 200</div>
+          <div class="venue-meta-item">🍸 Full Bar</div>
+          <div class="venue-meta-item">🎵 Sound System</div>
+        </div>
+        <div class="venue-footer">
+          <div class="venue-rating"><span class="stars">★★★★★</span> <span style="font-size:13px;color:var(--text-muted)">4.9 (211)</span></div>
+          <a href="#" class="btn-card">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="venue-card reveal reveal-delay-3">
+      <div class="venue-img" style="background:linear-gradient(135deg,#1A3025,#10B981,#34D399)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:70px;opacity:0.3">🎊</div>
+        <div class="venue-img-overlay"></div>
+        <span class="venue-badge">💼 Corporate</span>
+        <span class="venue-price-tag">$140/hr</span>
+      </div>
+      <div class="venue-body">
+        <div class="venue-name">Pinnacle Conference Hall</div>
+        <div class="venue-location">📍 Midtown, Atlanta</div>
+        <div class="venue-meta">
+          <div class="venue-meta-item">👥 Up to 500</div>
+          <div class="venue-meta-item">📡 AV Setup</div>
+          <div class="venue-meta-item">☕ Catering</div>
+        </div>
+        <div class="venue-footer">
+          <div class="venue-rating"><span class="stars">★★★★★</span> <span style="font-size:13px;color:var(--text-muted)">4.7 (76)</span></div>
+          <a href="#" class="btn-card">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="venue-card reveal">
+      <div class="venue-img" style="background:linear-gradient(135deg,#4A1A00,#F97316,#FBBF24)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:70px;opacity:0.3">🎂</div>
+        <div class="venue-img-overlay"></div>
+        <span class="venue-badge">🎂 Birthday</span>
+        <span class="venue-price-tag">$65/hr</span>
+      </div>
+      <div class="venue-body">
+        <div class="venue-name">Party Palace Suite</div>
+        <div class="venue-location">📍 East Village, NYC</div>
+        <div class="venue-meta">
+          <div class="venue-meta-item">👥 Up to 80</div>
+          <div class="venue-meta-item">💃 Dance Floor</div>
+          <div class="venue-meta-item">🎮 Games</div>
+        </div>
+        <div class="venue-footer">
+          <div class="venue-rating"><span class="stars">★★★★★</span> <span style="font-size:13px;color:var(--text-muted)">4.8 (152)</span></div>
+          <a href="#" class="btn-card">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="venue-card reveal reveal-delay-1">
+      <div class="venue-img" style="background:linear-gradient(135deg,#3B1A5A,#A855F7,#EC4899)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:70px;opacity:0.3">💒</div>
+        <div class="venue-img-overlay"></div>
+        <span class="venue-badge">💍 Wedding</span>
+        <span class="venue-price-tag">$350/hr</span>
+      </div>
+      <div class="venue-body">
+        <div class="venue-name">Ivory Rose Ballroom</div>
+        <div class="venue-location">📍 Coral Gables, Miami</div>
+        <div class="venue-meta">
+          <div class="venue-meta-item">👥 Up to 400</div>
+          <div class="venue-meta-item">🌹 Decor Incl.</div>
+          <div class="venue-meta-item">🚗 Valet</div>
+        </div>
+        <div class="venue-footer">
+          <div class="venue-rating"><span class="stars">★★★★★</span> <span style="font-size:13px;color:var(--text-muted)">5.0 (63)</span></div>
+          <a href="#" class="btn-card">View Details</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div style="text-align:center;margin-top:48px" class="reveal">
+    <a href="#" class="btn-primary btn-big">See All 500+ Venues →</a>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories" id="categories">
+  <div class="section-header">
+    <span class="section-tag reveal">Browse by Type</span>
+    <h2 class="section-title reveal reveal-delay-1">Every event, <em>every vibe</em></h2>
+    <p class="section-sub reveal reveal-delay-2">From intimate house parties to black-tie galas — we have the perfect space for it all.</p>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card reveal">
+      <div class="cat-bg"><span>🎊</span></div>
+      <div class="cat-overlay"></div>
+      <div class="cat-content">
+        <span class="cat-title">Birthday Parties</span>
+        <span class="cat-count">142 venues available</span>
+      </div>
+    </div>
+    <div class="cat-card reveal reveal-delay-1">
+      <div class="cat-bg"><span>💒</span></div>
+      <div class="cat-overlay"></div>
+      <div class="cat-content">
+        <span class="cat-title">Weddings</span>
+        <span class="cat-count">87 venues available</span>
+      </div>
+    </div>
+    <div class="cat-card reveal reveal-delay-2">
+      <div class="cat-bg"><span>💼</span></div>
+      <div class="cat-overlay"></div>
+      <div class="cat-content">
+        <span class="cat-title">Corporate Events</span>
+        <span class="cat-count">115 venues available</span>
+      </div>
+    </div>
+    <div class="cat-card reveal reveal-delay-1">
+      <div class="cat-bg"><span>🏠</span></div>
+      <div class="cat-overlay"></div>
+      <div class="cat-content">
+        <span class="cat-title">House Parties</span>
+        <span class="cat-count">63 venues available</span>
+      </div>
+    </div>
+    <div class="cat-card reveal reveal-delay-2">
+      <div class="cat-bg"><span>🎤</span></div>
+      <div class="cat-overlay"></div>
+      <div class="cat-content">
+        <span class="cat-title">Concerts & Live Events</span>
+        <span class="cat-count">48 venues available</span>
+      </div>
+    </div>
+    <div class="cat-card reveal reveal-delay-3">
+      <div class="cat-bg"><span>📊</span></div>
+      <div class="cat-overlay"></div>
+      <div class="cat-content">
+        <span class="cat-title">Conferences</span>
+        <span class="cat-count">72 venues available</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BELT -->
+<div class="stats-belt">
+  <div class="stats-belt-grid">
+    <div class="stat-item reveal">
+      <span class="stat-val">300%</span>
+      <span class="stat-lbl">Avg. booking increase for hosts</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+      <span class="stat-val">$500+</span>
+      <span class="stat-lbl">Avg. booking value</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <span class="stat-val">48hr</span>
+      <span class="stat-lbl">Free cancellation window</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <span class="stat-val">90%</span>
+      <span class="stat-lbl">Payout to hosts</span>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section style="background:var(--dark)">
+  <div class="section-header">
+    <span class="section-tag reveal">Real Stories</span>
+    <h2 class="section-title reveal reveal-delay-1">What our <em>community</em> says</h2>
+    <p class="section-sub reveal reveal-delay-2">Thousands of events. Hundreds of stories. One platform.</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <span class="quote-mark">"</span>
+      <p class="testimonial-text">Found the perfect rooftop venue for my 30th birthday in under 10 minutes. Booking was seamless, the host was amazing, and the space was exactly as advertised. Absolutely incredible experience.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">SM</div>
+        <div>
+          <div class="author-name">Sarah M.</div>
+          <div class="author-role">Birthday Party, NYC</div>
+        </div>
+        <div class="author-stars">★★★★★</div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-1">
+      <span class="quote-mark">"</span>
+      <p class="testimonial-text">As a corporate event manager, I've tried every platform. PartySpace is in a league of its own. The venue selection, host communication, and booking tools are unmatched. My entire team uses it now.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">JD</div>
+        <div>
+          <div class="author-name">John D.</div>
+          <div class="author-role">Corporate Events, Chicago</div>
+        </div>
+        <div class="author-stars">★★★★★</div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-2">
+      <span class="quote-mark">"</span>
+      <p class="testimonial-text">Our wedding venue search took years with other platforms. PartySpace had us booked in a weekend. The support team held our hand throughout. Best decision we made for our big day.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">MK</div>
+        <div>
+          <div class="author-name">Maria K.</div>
+          <div class="author-role">Wedding, Miami</div>
+        </div>
+        <div class="author-stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOST & GUEST CTA PANELS -->
+<section class="host-cta-section" id="host">
+  <div class="host-cta-inner">
+    <div class="cta-panel cta-panel-guest reveal">
+      <div class="cta-panel-bg">🎉</div>
+      <h3>Planning an Event?</h3>
+      <p>Browse 500+ verified venues in 50+ cities. Instant booking, secure payments, and 24/7 support — everything you need to celebrate with confidence.</p>
+      <a href="#" class="btn-primary btn-big" style="font-size:15px">Find Your Venue →</a>
+    </div>
+    <div class="cta-panel cta-panel-host reveal reveal-delay-1">
+      <div class="cta-panel-bg">💰</div>
+      <h3>Own a Venue?</h3>
+      <p>Turn your space into a revenue machine. Access 10,000+ potential customers monthly. Keep 90% of every booking. Manage everything from one dashboard.</p>
+      <a href="#" class="btn-gold btn-big" style="font-size:15px">List Your Venue →</a>
+    </div>
+  </div>
+</section>
+
+<!-- APP DOWNLOAD -->
+<section class="app-section" style="background:var(--dark)">
+  <span class="section-tag reveal">Mobile App</span>
+  <h2 class="section-title reveal reveal-delay-1" style="margin:0 auto 16px">Your perfect venue, <em>in your pocket</em></h2>
+  <p class="section-sub reveal reveal-delay-2" style="margin:0 auto">Download the PartySpace app and book anywhere, anytime. Available on iOS and Android — free forever.</p>
+  <div class="app-badges">
+    <a href="#" class="app-badge reveal reveal-delay-1">
+      <div class="app-badge-icon">🍎</div>
+      <div class="app-badge-text">
+        <div class="app-badge-sub">Download on the</div>
+        <div class="app-badge-name">App Store</div>
+      </div>
+    </a>
+    <a href="#" class="app-badge reveal reveal-delay-2">
+      <div class="app-badge-icon">▶️</div>
+      <div class="app-badge-text">
+        <div class="app-badge-sub">Get it on</div>
+        <div class="app-badge-name">Google Play</div>
+      </div>
+    </a>
+    <a href="#" class="app-badge reveal reveal-delay-3">
+      <div class="app-badge-icon">💻</div>
+      <div class="app-badge-text">
+        <div class="app-badge-sub">Use the</div>
+        <div class="app-badge-name">Web App</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="section-header">
+    <span class="section-tag reveal">Got Questions?</span>
+    <h2 class="section-title reveal reveal-delay-1">Everything you <em>need to know</em></h2>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-item reveal">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How do I book a venue?
+        <span class="faq-toggle">+</span>
+      </button>
+      <div class="faq-a">Search venues by location, date, and capacity. Select your venue, choose a date and time, add any services, and pay securely through Stripe. You'll receive instant confirmation via email and in the app.</div>
+    </div>
+    <div class="faq-item reveal reveal-delay-1">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What's included in the platform fee?
+        <span class="faq-toggle">+</span>
+      </button>
+      <div class="faq-a">PartySpace charges an 11% platform fee on all bookings. This covers secure payment processing, 24/7 customer support, host verification, and the guarantee that comes with every booking. There are no hidden fees — the price you see is the price you pay.</div>
+    </div>
+    <div class="faq-item reveal reveal-delay-2">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Can I cancel my booking?
+        <span class="faq-toggle">+</span>
+      </button>
+      <div class="faq-a">Yes! You can cancel your booking up to 48 hours before your event for a full refund. Cancellations within 48 hours may be subject to the host's cancellation policy. You can manage all your bookings from your profile page.</div>
+    </div>
+    <div class="faq-item reveal reveal-delay-3">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How do hosts get paid?
+        <span class="faq-toggle">+</span>
+      </button>
+      <div class="faq-a">Hosts receive 90% of the booking fee (minus 2.9% + $0.30 Stripe payment processing). Payouts are processed after the event is completed and released to your linked bank account within 3-5 business days.</div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Are venues verified?
+        <span class="faq-toggle">+</span>
+      </button>
+      <div class="faq-a">Every venue and host on PartySpace goes through our verification process. We confirm venue details, check host identity, and review guest feedback. Verified hosts receive a badge on their profile to build trust with guests.</div>
+    </div>
+    <div class="faq-item reveal reveal-delay-1">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Can I add services like catering or a DJ?
+        <span class="faq-toggle">+</span>
+      </button>
+      <div class="faq-a">Absolutely! When booking a venue, you can add services from our verified service providers — including catering, photography, DJs, and more. Bundle services together for exclusive discounts available through the app.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo" style="font-size:26px">Party<span>Space</span></a>
+        <p>The leading venue marketplace for unforgettable events. Find, book, and celebrate — all in one place.</p>
+        <form class="newsletter-form" onsubmit="return false">
+          <input type="email" placeholder="Your email address">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#">Browse Venues</a></li>
+          <li><a href="#">Categories</a></li>
+          <li><a href="#">Event Calendar</a></li>
+          <li><a href="#">Mobile App</a></li>
+          <li><a href="#">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Hosts</h4>
+        <ul>
+          <li><a href="#">List Your Venue</a></li>
+          <li><a href="#">Host Dashboard</a></li>
+          <li><a href="#">Pricing Plans</a></li>
+          <li><a href="#">Success Stories</a></li>
+          <li><a href="#">Host Resources</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Terms & Privacy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 PartySpace. All rights reserved. Made with 🎉 for every celebration.</span>
+      <div class="social-links">
+        <a href="#" class="social-btn">📷</a>
+        <a href="#" class="social-btn">📘</a>
+        <a href="#" class="social-btn">🐦</a>
+        <a href="#" class="social-btn">💼</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const cursorRing = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animateCursor() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    cursorRing.style.left = rx + 'px'; cursorRing.style.top = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+  document.querySelectorAll('a, button, input').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.width='20px'; cursor.style.height='20px'; });
+    el.addEventListener('mouseleave', () => { cursor.style.width='12px'; cursor.style.height='12px'; });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => io.observe(el));
+
+  // FAQ
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.background = window.scrollY > 60 ? 'rgba(13,10,26,0.95)' : 'rgba(13,10,26,0.7)';
+  });
+
+  // Counter animation
+  function animateCounter(el, target, suffix='') {
+    let start = 0;
+    const duration = 1800;
+    const step = timestamp => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const val = Math.floor(progress * target);
+      el.textContent = val.toLocaleString() + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const trustNumbers = document.querySelectorAll('.trust-number');
+  const counterIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const text = e.target.textContent;
+        if (text.includes('10K')) animateCounter(e.target, 10000, '+');
+        else if (text.includes('4.8')) { e.target.textContent = '4.8★'; }
+        else if (text.includes('500')) animateCounter(e.target, 500, '+');
+        else if (text.includes('50')) animateCounter(e.target, 50, '+');
+        counterIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  trustNumbers.forEach(el => counterIO.observe(el));
+</script>
+</body>
+</html>
