@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "YOUR_TEAM_ID.space.manus.partyspace.app.t20260209214049",
+        "paths": [
+          "/venues/*",
+          "/hosts/*",
+          "/booking/*",
+          "/profile/*"
+        ]
+      }
+    ]
+  }
+}
