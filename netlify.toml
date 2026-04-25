@@ -1,12 +1,9 @@
 [build]
   publish = "public"
-  command = "echo 'Static site — no build step'"
 
 [build.environment]
   NODE_VERSION = "24"
 
-# Proxy /api/trpc/* to your real backend
-# Replace https://your-api.railway.app with your actual tRPC backend URL
 [[redirects]]
   from = "/api/trpc/*"
   to = "https://your-api.railway.app/trpc/:splat"
@@ -14,14 +11,12 @@
   force = true
   headers = {X-From = "partyspace-website"}
 
-# Universal Links for iOS
 [[redirects]]
   from = "/.well-known/apple-app-site-association"
   to = "/.well-known/apple-app-site-association"
   status = 200
   headers = {Content-Type = "application/json"}
 
-# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
