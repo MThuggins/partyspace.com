@@ -1,0 +1,14 @@
+{
+  "name": "partyspace-website",
+  "version": "1.0.0",
+  "description": "PartySpace website — integrated with mobile app backend",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
