@@ -12,12 +12,6 @@
   headers = {X-From = "partyspace-website"}
 
 [[redirects]]
-  from = "/.well-known/apple-app-site-association"
-  to = "/.well-known/apple-app-site-association"
-  status = 200
-  headers = {Content-Type = "application/json"}
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
