@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "name": "partyspace-website",
+  "public": true,
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "public",
+  "env": {
+    "NODE_VERSION": "24",
+    "TRPC_API_URL": "@trpc_api_url"
+  },
+  "envs": {
+    "TRPC_API_URL": {
+      "description": "Backend tRPC API URL (e.g., https://your-api.railway.app/trpc)"
+    }
+  },
+  "functions": {
+    "server.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/trpc/(.*)",
+      "destination": "/server.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/index.html"
+    }
+  ]
+}
