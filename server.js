@@ -58,13 +58,8 @@ function serveIndex(res) {
 }
 
 async function proxyToTRPC(req, res, trpcPath) {
-  if (!TRPC_API_URL) {
-    res.writeHead(503, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: { message: "TRPC_API_URL not configured." } }));
-    return;
-  }
-
-  const targetUrl = `${TRPC_API_URL}/${trpcPath}${req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : ""}`;
+  const queryString = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  const targetUrl = `${TRPC_API_URL}/${trpcPath}${queryString}`;
 
   try {
     let body = "";
@@ -79,14 +74,21 @@ async function proxyToTRPC(req, res, trpcPath) {
         ...(req.headers["authorization"] && {
           Authorization: req.headers["authorization"],
         }),
+        ...(req.headers["cookie"] && {
+          Cookie: req.headers["cookie"],
+        }),
       },
       ...(body && { body }),
     });
 
     const data = await response.text();
+    const setCookie = response.headers.get("set-cookie");
+
     res.writeHead(response.status, {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "http://localhost:3001",
+      "Access-Control-Allow-Credentials": "true",
+      ...(setCookie && { "Set-Cookie": setCookie }),
     });
     res.end(data);
   } catch (err) {
@@ -135,9 +137,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "http://localhost:3001",
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type,Authorization",
+      "Access-Control-Allow-Credentials": "true",
     });
     res.end();
     return;
