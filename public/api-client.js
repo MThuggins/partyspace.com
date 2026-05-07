@@ -75,24 +75,22 @@
 
   const Auth_API = {
     /** Login with email+password — same endpoint the app uses */
-    login: async (email, password) => {
-      const result = await trpcMutation("auth.loginEmail", { email, password });
-      if (result?.token) {
-        Auth.setToken(result.token);
-        Auth.setUser(result.user);
-      }
-      return result;
-    },
+   login: async (email, password) => {
+  const result = await trpcMutation("auth.loginEmail", { email, password });
+  if (result?.success) {
+    Auth.setUser({ name: result.name, email: result.email });
+  }
+  return result;
+},
 
     /** Register new account */
-    signup: async (name, email, password, role = "user") => {
-      const result = await trpcMutation("auth.signup", { name, email, password, role });
-      if (result?.token) {
-        Auth.setToken(result.token);
-        Auth.setUser(result.user);
-      }
-      return result;
-    },
+   signup: async (name, email, password, role = "user") => {
+  const result = await trpcMutation("auth.signupEmail", { name, email, password });
+  if (result?.success) {
+    Auth.setUser({ name, email });
+  }
+  return result;
+},
 
     logout: () => {
       Auth.clearToken();
