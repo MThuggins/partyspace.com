@@ -1,17 +1,3 @@
-/**
- * PartySpace Website Server — Node.js 24
- *
- * Serves the static website AND proxies API calls to the tRPC backend.
- * This means the website and app share ONE backend with NO CORS issues.
- *
- * Routes:
- *   GET  /              → public/index.html
- *   GET  /api/trpc/*    → proxied to TRPC_API_URL (the real backend)
- *   POST /api/trpc/*    → proxied to TRPC_API_URL (the real backend)
- *   GET  /.well-known/* → served from public/.well-known/ (Universal Links)
- *   GET  /*             → public/index.html (SPA fallback)
- */
-
 import { createServer } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
 import { join, extname, dirname } from "node:path";
@@ -19,14 +5,8 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
-
-// ─── tRPC Backend URL ─────────────────────────────────────────────────────────
-// Set TRPC_API_URL in your .env or hosting environment variables.
-// Example: https://partyspace-api.railway.app/trpc
-// If not set, API calls will return a 503 with a helpful message.
 const TRPC_API_URL = process.env.TRPC_API_URL || "http://localhost:3000/api/trpc";
 
-// ─── MIME Types ───────────────────────────────────────────────────────────────
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css",
@@ -43,7 +23,6 @@ const MIME = {
   ".webp": "image/webp",
 };
 
-// ─── Static File Server ───────────────────────────────────────────────────────
 function serveStatic(res, filePath, ext) {
   try {
     const content = readFileSync(filePath);
@@ -67,7 +46,10 @@ function serveStatic(res, filePath, ext) {
 function serveIndex(res) {
   try {
     const content = readFileSync(join(__dirname, "public", "index.html"));
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-cache",
+    });
     res.end(content);
   } catch {
     res.writeHead(500);
@@ -75,18 +57,10 @@ function serveIndex(res) {
   }
 }
 
-// ─── API Proxy to tRPC Backend ────────────────────────────────────────────────
 async function proxyToTRPC(req, res, trpcPath) {
   if (!TRPC_API_URL) {
     res.writeHead(503, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        error: {
-          message:
-            "TRPC_API_URL not configured. Set this environment variable to your PartySpace backend URL.",
-        },
-      })
-    );
+    res.end(JSON.stringify({ error: { message: "TRPC_API_URL not configured." } }));
     return;
   }
 
@@ -121,7 +95,6 @@ async function proxyToTRPC(req, res, trpcPath) {
   }
 }
 
-// ─── Universal Links Files ────────────────────────────────────────────────────
 function serveUniversalLinks(res, filename) {
   const files = {
     "apple-app-site-association": JSON.stringify({
@@ -140,4 +113,62 @@ function serveUniversalLinks(res, filename) {
         relation: ["delegate_permission/common.handle_all_urls"],
         target: {
           namespace: "android_app",
-          packa
+          package_name: "space.manus.partyspace.app.t20260209214049",
+          sha256_cert_fingerprints: ["YOUR_SHA256_CERT_FINGERPRINT_HERE"],
+        },
+      },
+    ]),
+  };
+
+  const content = files[filename];
+  if (content) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(content);
+  } else {
+    res.writeHead(404);
+    res.end("Not found");
+  }
+}
+
+const server = createServer(async (req, res) => {
+  const pathname = decodeURIComponent(req.url.split("?")[0]);
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type,Authorization",
+    });
+    res.end();
+    return;
+  }
+
+  if (pathname.startsWith("/api/trpc/")) {
+    const trpcPath = pathname.replace("/api/trpc/", "");
+    await proxyToTRPC(req, res, trpcPath);
+    return;
+  }
+
+  if (pathname.startsWith("/.well-known/")) {
+    const filename = pathname.replace("/.well-known/", "");
+    serveUniversalLinks(res, filename);
+    return;
+  }
+
+  const ext = extname(pathname);
+  if (ext && ext !== ".html") {
+    const filePath = join(__dirname, "public", pathname);
+    if (existsSync(filePath)) {
+      serveStatic(res, filePath, ext);
+      return;
+    }
+  }
+
+  serveIndex(res);
+});
+
+server.listen(PORT, () => {
+  console.log(`\n🎉 PartySpace website running on http://localhost:${PORT}`);
+  console.log(`   Node.js ${process.version}`);
+  console.log(`   tRPC Backend: ${TRPC_API_URL}\n`);
+});
