@@ -11,7 +11,7 @@
   // ─── Config ──────────────────────────────────────────────────────────────────
   // In production, replace with your real tRPC backend URL.
   // The website's server.js proxies /api/trpc → TRPC_API_URL to avoid CORS.
-  const API_BASE = "/api/trpc";
+  const API_BASE = "http://localhost:3000/api/trpc";
   const APP_SCHEME = "manus20260209214049"; // from app.config.ts bundle ID
 
   // ─── Auth Token ──────────────────────────────────────────────────────────────
